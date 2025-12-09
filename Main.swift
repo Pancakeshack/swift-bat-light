@@ -1,8 +1,6 @@
 @main
 struct Main {
-    // --- UPDATED PIN MAPPING ---
-    // OE moved to GP15 (Physical Pin 20) to avoid boot noise
-    static let PIN_OE: UInt32 = 15
+    static let PIN_OE: UInt32 = 0
 
     // Standard HUB75 Pins
     static let PIN_CLK: UInt32 = 1  // GP1
@@ -40,14 +38,6 @@ struct Main {
 
         // Start with OE HIGH (Screen OFF) - Active Low Logic
         gpio_put(PIN_OE, true)
-
-        // 2. THE UNLOCK (Repeated 3 times to be safe)
-        // This wakes up FM6126A chips
-        unlockFM6126A()
-        sleep_ms(10)
-        unlockFM6126A()
-        sleep_ms(10)
-        unlockFM6126A()
 
         var colorStep = 0
 
@@ -110,13 +100,6 @@ struct Main {
 
         // F. Hold Image (Adjust brightness here)
         sleep_us(100)
-    }
-
-    // --- FM6126A UNLOCK SEQUENCE ---
-    static func unlockFM6126A() {
-        // Send unlock pattern to Reg 12 and Reg 13
-        sendPattern(reg: 12, data: 0b01111111_11111111)  // 0x7FFF
-        sendPattern(reg: 13, data: 0b00000000_01000000)  // 0x0040
     }
 
     static func sendPattern(reg: Int, data: UInt16) {
