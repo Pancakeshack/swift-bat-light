@@ -1,136 +1,141 @@
 @main
 struct Main {
-    static let PIN_OE: UInt32 = 0
+    // The neutral frame you modified (kept exactly as you provided)
+    static let batNeutral: InlineArray = [
+        "................................",  // Row 0
+        "................................",  // Row 1
+        "................................",  // Row 2
+        ".............P....P.............",  // Row 3  (Ears)
+        "............PRPPPPRP............",  // Row 4  (Eyes - Modified Pattern)
+        ".........P..PPPPPPPP..P.........",  // Row 5
+        "........PPPPPPPPPPPPPPPP........",  // Row 6
+        ".......PPPPPPPPPPPPPPPPPP.......",  // Row 7
+        "......PPPPPPPPPPPPPPPPPPPP......",  // Row 8
+        ".......P...PPPPPPPPPP...P.......",  // Row 9
+        "...........PPPPPPPPPP...........",  // Row 10
+        "............P.PPPP.P............",  // Row 11
+        "..............P..P..............",  // Row 12
+        "................................",  // Row 13
+        "................................",  // Row 14
+        "................................",  // Row 15
+    ]
 
-    // Standard HUB75 Pins
-    static let PIN_CLK: UInt32 = 1  // GP1
-    static let PIN_LAT: UInt32 = 2  // GP2
+    // Wings raised: Thickened considerably to look like a full membrane, not a wire
+    static let batUp: InlineArray = [
+        "P..............................P",  // Row 0  (Tips extend to very top)
+        "PP............................PP",  // Row 1  (Tips are now blocky/thick)
+        "PPP..........P....P..........PPP",  // Row 2  (Connecting mass)
+        "PPPP........PRPPPPRP........PPPP",  // Row 3  (Wings merge into head row)
+        ".PPPP......PPPPPPPPPP......PPPP.",  // Row 4  (Shoulders are heavy)
+        "..PPPPPPPPPPPPPPPPPPPPPPPPPPPP..",  // Row 5  (Wide wingspan)
+        "...PPPPPPPPPPPPPPPPPPPPPPPPPP...",  // Row 6
+        ".....PPPPPPPPPPPPPPPPPPPPPP.....",  // Row 7  (Tapering body)
+        ".......PPPPPPPPPPPPPPPPPP.......",  // Row 8
+        ".........PPPPPPPPPPPPPP.........",  // Row 9
+        "...........PPPPPPPPPP...........",  // Row 10
+        ".............PPPPPP.............",  // Row 11 (Tail tucks in)
+        "................................",  // Row 12
+        "................................",  // Row 13
+        "................................",  // Row 14
+        "................................",  // Row 15
+    ]
 
-    static let PIN_G1: UInt32 = 3
-    static let PIN_B1: UInt32 = 4
-    static let PIN_R1: UInt32 = 5
+    // Wings down: A heavy 'cape' look, maintaining volume
+    static let batDown: InlineArray = [
+        "................................",  // Row 0
+        "................................",  // Row 1
+        "................................",  // Row 2
+        ".............P....P.............",  // Row 3  (Ears)
+        "............PRPPPPRP............",  // Row 4  (Eyes)
+        "..........PPPPPPPPPPPP..........",  // Row 5  (Shoulders hunch)
+        ".......PPPPPPPPPPPPPPPPPP.......",  // Row 6  (Wings start heavy)
+        ".....PPPPPPPPPPPPPPPPPPPPPP.....",  // Row 7
+        "....PPPPPPPPPPPPPPPPPPPPPPPP....",  // Row 8  (Full width)
+        "...PPPP...PPPPPPPPPPPP...PPPP...",  // Row 9  (Wings extend down)
+        "..PPP.......PPPPPPPP.......PPP..",  // Row 10 (Thick tips)
+        ".PP..........PPPPPP..........PP.",  // Row 11
+        "P..............PP..............P",  // Row 12 (Lowest point)
+        "................................",  // Row 13
+        "................................",  // Row 14
+        "................................",  // Row 15
+    ]
 
-    // Your Wiring (A=GP6, C=GP7, B=GP8)
-    // Note: If rows look scrambled, swap B and C variables here.
-    static let PIN_A: UInt32 = 6
-    static let PIN_C: UInt32 = 7
-    static let PIN_B: UInt32 = 8
+    static let sequence: InlineArray = [0, 1, 0, 2]
 
-    static let PIN_R2: UInt32 = 9
-    static let PIN_G2: UInt32 = 10
-    static let PIN_B2: UInt32 = 11
+    static func batShape(at index: Int) -> InlineArray<16, String> {
+        switch sequence[index] {
+        case 0:
+            return Main.batNeutral
+        case 1:
+            return Main.batUp
+        case 2:
+            return Main.batDown
+        default:
+            return Main.batNeutral
+        }
+    }
 
-    static let ONBOARD_LED: UInt32 = UInt32(CYW43_WL_GPIO_LED_PIN)
+    static func nextShapeIndex(current: Int) -> Int {
+        let nextIndex = current + 1
+        if nextIndex < sequence.count {
+            return nextIndex
+        } else {
+            return 0
+        }
+    }
 
     static func main() {
+        stdio_init_all()
         if cyw43_arch_init() != 0 { return }
 
-        // 1. Initialize ALL Pins
-        let allPins = [
-            PIN_OE, PIN_CLK, PIN_LAT, PIN_G1, PIN_B1, PIN_R1, PIN_A, PIN_C, PIN_B, PIN_R2, PIN_G2,
-            PIN_B2,
-        ]
-        for pin in allPins {
-            gpio_init(pin)
-            gpio_set_dir(pin, true)
-            gpio_put(pin, false)
-        }
+        print("Starting Clean Matrix...")
+        sleep_ms(2000)
 
-        // Start with OE HIGH (Screen OFF) - Active Low Logic
-        gpio_put(PIN_OE, true)
+        let config = MatrixConfig(
+            width: 32,
+            height: 16,
+            bitDepth: 4,
+            rgbPins: (5, 3, 4, 9, 10, 11),
+            addrPins: (6, 8, 7),
+            clockPin: 1,
+            latchPin: 2,
+            oePin: 0
+        )
 
-        var colorStep = 0
+        let matrix = Matrix(config: config)
 
-        // 3. Main Loop
+        let purple = Matrix.color565(r: 180, g: 0, b: 255)
+        let red = Matrix.color565(r: 255, g: 0, b: 0)
+
+        print("Looping...")
+
+        var loopCounter = 0
+        var currentBatShape = 0
+
         while true {
-            // Heartbeat: Blink LED so you know Pico is alive
-            colorStep += 1
-            if colorStep % 200 == 0 {
-                cyw43_arch_gpio_put(ONBOARD_LED, true)
-            } else if colorStep % 200 == 100 {
-                cyw43_arch_gpio_put(ONBOARD_LED, false)
+            loopCounter += 1
+
+            if loopCounter == 50 {
+                loopCounter = 0
+                currentBatShape = Self.nextShapeIndex(current: currentBatShape)
             }
 
-            // Cycle Colors: 0=Red, 1=Green, 2=Blue
-            let frameColor = (colorStep / 500) % 3
+            matrix.clear(color: 0)
 
-            // Scan 8 Rows
-            for row in 0..<8 {
-                driveRow(row: row, colorIdx: frameColor)
+            let batShape = Self.batShape(at: currentBatShape)
+            for y in batShape.indices {
+                let row = batShape[y]
+                for (x, char) in row.utf8.enumerated() {
+                    if char == UInt8(ascii: "P") {
+                        matrix.drawPixel(x: x, y: y, color: purple)
+                    } else if char == UInt8(ascii: "R") {
+                        matrix.drawPixel(x: x, y: y, color: red)
+                    }
+                }
             }
+
+            matrix.show()
+            sleep_ms(20)  // 50fps refresh logic
         }
-    }
-
-    static func driveRow(row: Int, colorIdx: Int) {
-        // A. Screen OFF (Active Low: True = OFF)
-        gpio_put(PIN_OE, true)
-
-        // B. Address Select
-        gpio_put(PIN_A, (row & 1) != 0)
-        gpio_put(PIN_B, (row & 2) != 0)
-        gpio_put(PIN_C, (row & 4) != 0)
-
-        // C. Shift Data (32 Pixels)
-        for _ in 0..<32 {
-            let r = (colorIdx == 0)
-            let g = (colorIdx == 1)
-            let b = (colorIdx == 2)
-
-            // Top Half
-            gpio_put(PIN_R1, r)
-            gpio_put(PIN_G1, g)
-            gpio_put(PIN_B1, b)
-            // Bottom Half
-            gpio_put(PIN_R2, r)
-            gpio_put(PIN_G2, g)
-            gpio_put(PIN_B2, b)
-
-            // Clock Pulse
-            gpio_put(PIN_CLK, true)
-            // No sleep needed here for Swift on Pico, it's slow enough
-            gpio_put(PIN_CLK, false)
-        }
-
-        // D. Latch Data
-        gpio_put(PIN_LAT, true)
-        gpio_put(PIN_LAT, false)
-
-        // E. Screen ON (Active Low: False = ON)
-        gpio_put(PIN_OE, false)
-
-        // F. Hold Image (Adjust brightness here)
-        sleep_us(100)
-    }
-
-    static func sendPattern(reg: Int, data: UInt16) {
-        // FM6126A expects the pattern across the WHOLE width
-        for i in 0..<32 {
-            let idx = i & 15
-            let bitPos = 15 - idx
-            let bitSet = (data >> bitPos) & 1 == 1
-
-            // Set all data pins
-            gpio_put(PIN_R1, bitSet)
-            gpio_put(PIN_G1, bitSet)
-            gpio_put(PIN_B1, bitSet)
-            gpio_put(PIN_R2, bitSet)
-            gpio_put(PIN_G2, bitSet)
-            gpio_put(PIN_B2, bitSet)
-
-            // Clock Low
-            gpio_put(PIN_CLK, false)
-
-            // Special Latch Logic for Unlock
-            // Latch must be HIGH *during* the last few clock cycles
-            if i > (32 - 1 - reg) { gpio_put(PIN_LAT, true) } else { gpio_put(PIN_LAT, false) }
-
-            // Clock High -> Low
-            gpio_put(PIN_CLK, true)
-            gpio_put(PIN_CLK, false)
-        }
-        // Final Latch Toggle
-        gpio_put(PIN_LAT, false)
-        gpio_put(PIN_LAT, true)
-        gpio_put(PIN_LAT, false)
     }
 }
