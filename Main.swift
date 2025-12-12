@@ -21,38 +21,25 @@ func launchMatrixRunner() {
 }
 
 struct MatrixRunner {
-    // 32x16 Matrix Layout
-    // P = Purple Body
-    // R = Red Heart
-    // C = Cyan Text "CUTIE"
-    // . = Black/Empty
-
-    // --- TEXT LAYOUT (Rows 11-15) ---
-    // The word "CUTIE" is fixed in the bottom right for frames 1-9.
-    // C(3) U(3) T(3) I(1) E(3) = 17 pixels wide.
-    // Fits at indices 14-30.
-
-    // Frame 0: Neutral (No Text, No Heart)
     static let frame0: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
         "PPPPPPPPPP......................",
         "PPPPPPPPPPPP....................",
-        "PPP..PP..PPP....................",  // Eye Row 1 (2x2 gap)
-        "PPP..PP..PPP....................",  // Eye Row 2 (2x2 gap)
+        "PPP..PP..PPP....................",  
+        "PPP..PP..PPP....................", 
         "PPPPPPPPPPPP....................",
         "PPPPPPPPPPPP....................",
         "PPPPPPPPPPPP....................",
         "PPPPPPPPPPPP....................",
         "PPPPPPPPPPPP....................",
-        "PPPPPPPPPPPP....................",  // No text
+        "PPPPPPPPPPPP....................",  
         "PP..PPPP..PP....................",
         "................................",
         "................................",
         "................................",
     ]
 
-    // Frame 1: Heart Appears + Text Appears
     static let frame1: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
@@ -65,14 +52,13 @@ struct MatrixRunner {
         "PPPPPPPPPPPP....................",
         "PPPPPPPPPPPP....................",
         "PPPPPPPPPPPP....................",
-        "PPPPPPPPPPPP..CCC.C.C.CCC.C.CCC.",  // CUTIE (Row 1)
-        "PP..PPPP..PP..C...C.C..C..C.C...",  // CUTIE (Row 2)
-        "..............C...C.C..C..C.CCC.",  // CUTIE (Row 3)
-        "..............C...C.C..C..C.C...",  // CUTIE (Row 4)
-        "..............CCC.CCC..C..C.CCC.",  // CUTIE (Row 5)
+        "PPPPPPPPPPPP..CCC.C.C.CCC.C.CCC.", 
+        "PP..PPPP..PP..C...C.C..C..C.C...",  
+        "..............C...C.C..C..C.CCC.", 
+        "..............C...C.C..C..C.C...",  
+        "..............CCC.CCC..C..C.CCC.", 
     ]
 
-    // Frame 2: Heart Moves Right
     static let frame2: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
@@ -92,7 +78,6 @@ struct MatrixRunner {
         "..............CCC.CCC..C..C.CCC.",
     ]
 
-    // Frame 3: Heart Moves Right
     static let frame3: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
@@ -112,7 +97,6 @@ struct MatrixRunner {
         "..............CCC.CCC..C..C.CCC.",
     ]
 
-    // Frame 4: Heart Moves Right
     static let frame4: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
@@ -132,7 +116,6 @@ struct MatrixRunner {
         "..............CCC.CCC..C..C.CCC.",
     ]
 
-    // Frame 5: Heart Moves Right
     static let frame5: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
@@ -152,7 +135,6 @@ struct MatrixRunner {
         "..............CCC.CCC..C..C.CCC.",
     ]
 
-    // Frame 6: Heart Moves Right
     static let frame6: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
@@ -172,7 +154,6 @@ struct MatrixRunner {
         "..............CCC.CCC..C..C.CCC.",
     ]
 
-    // Frame 7: Heart Moves Right
     static let frame7: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
@@ -192,7 +173,6 @@ struct MatrixRunner {
         "..............CCC.CCC..C..C.CCC.",
     ]
 
-    // Frame 8: Heart Clipping
     static let frame8: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
@@ -212,7 +192,6 @@ struct MatrixRunner {
         "..............CCC.CCC..C..C.CCC.",
     ]
 
-    // Frame 9: Heart Exiting
     static let frame9: InlineArray = [
         "................................",
         ".PPPPPPPP.......................",
