@@ -55,13 +55,17 @@ add_executable(swift-bat-light
     lib/protomatter/core.c 
 )
 
+pico_enable_stdio_uart(swift-bat-light 1)
+pico_enable_stdio_usb(swift-bat-light 1)
+
 set_target_properties(swift-bat-light PROPERTIES LINKER_LANGUAGE CXX)
 
 # --- 3. Link Required Hardware Libraries ---
 # Protomatter needs: hardware_pwm, hardware_timer, hardware_irq, hardware_clocks
 # Swift needs: atomic (for thread safety checks)
 target_link_libraries(swift-bat-light
-    pico_stdlib 
+    pico_stdlib
+    pico_multicore 
     hardware_uart 
     hardware_gpio 
     pico_lwip_arch 

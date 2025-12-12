@@ -4,6 +4,9 @@
 #include <malloc.h>
 #include "core.h" 
 
+#include "pico/stdlib.h"
+#include "pico/multicore.h"
+
 Protomatter_core *_PM_protoPtr = NULL;
 
 void PM_SetCorePointer(Protomatter_core *core) {
@@ -47,4 +50,20 @@ bool __atomic_compare_exchange_4(volatile void *ptr, void *expected, uint32_t de
         *(uint32_t *)expected = current;
         return false;
     }
+}
+
+void glue_launch_core1(void (*entry_point)(void)) {
+    multicore_launch_core1(entry_point);
+}
+
+void glue_fifo_push(uint32_t data) {
+    multicore_fifo_push_blocking(data);
+}
+
+uint32_t glue_fifo_pop(void) {
+    return multicore_fifo_pop_blocking();
+}
+
+bool glue_fifo_has_data(void) {
+    return multicore_fifo_rvalid();
 }
